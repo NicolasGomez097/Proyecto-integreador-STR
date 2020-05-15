@@ -23,11 +23,11 @@ class Motor_Simulated(Motor):
         velocidad_final = self.velocidad_maxima * (1 - exp(-self.torque * self.sensibilidad))
 
         # Se realiza una interpolacion lineal con el valor de velocidad actual y correspondiente
-        #con un valor probado de 0.05
+        #con un valor probado de 0.01
         self.velocidad = self.lerp(
             self.velocidad,
             velocidad_final,
-            0.015
+            0.01
         )
         return self.velocidad
 

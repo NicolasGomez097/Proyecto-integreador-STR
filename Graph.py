@@ -27,6 +27,7 @@ class Graph(Gtk.ScrolledWindow):
         self.on_frame_callback = []
 
         self.ax.set_xlim(-self.range, 0)
+        self.ax.set_ylabel('Velocidad')
         self.ax.set_ylim(yrange[0], yrange[1])
 
         self.ax.set_xlabel('Segundos')
@@ -48,7 +49,6 @@ class Graph(Gtk.ScrolledWindow):
             self.ax.set_xlim(x - self.range, x)
 
         self.xdata.append(x)
-        #self.lastValue = np.sin(x)
         self.ydata.append(self.last_value)        
         
         self.ln.set_data(self.xdata, self.ydata)
@@ -62,7 +62,6 @@ class Graph(Gtk.ScrolledWindow):
         return self.last_value
 
     def init_animation(self):
-        # Se debe hacer en este orden
         FuncAnimation(self.fig, self.update, frames=None, blit=True, interval = self.interval)
 
     def add_on_frame(self, callback, *args):
