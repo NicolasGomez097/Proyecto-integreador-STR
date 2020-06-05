@@ -18,10 +18,11 @@ int main() {
     FD_SET(fd, &readfds);
 
     for (i = 0; i < cant; i++) {
-        res = select(1, &readfds, NULL, NULL, &timeout);
+        res = select(2, &readfds, NULL, NULL, &timeout);
+
         rtc_tick();
-   	printf("*");
-	fflush(stdout);
+        printf("%d", res);
+        fflush(stdout);
     }
     printf("\n");
     rtc_close();

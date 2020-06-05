@@ -1,0 +1,2 @@
+make cpp &&
+cpp/demo &
