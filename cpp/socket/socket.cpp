@@ -49,21 +49,35 @@ void ServerTCP::initSocketServer() {
     }  
 }
 
-char* ServerTCP::readSocket() {
-  if ((THIS new_socket = accept(THIS server_fd, (struct sockaddr *)&address,  
-                      (socklen_t*)&addrlen))<0) 
-  { 
-      perror("accept"); 
-      exit(EXIT_FAILURE); 
-  } 
-  THIS valread = read(THIS new_socket , buffer, 1024); 
-  return buffer;
+int ServerTCP::acceptConnection() {
+    if ((THIS new_socket = accept(
+            THIS server_fd, (struct sockaddr *)&address,  
+                      (socklen_t*)&addrlen)
+        )<0){ 
+        perror("accept"); 
+        exit(EXIT_FAILURE); 
+    } 
+    return THIS new_socket;
 }
 
-void ServerTCP::sendMsg(char* data) {
-      send(THIS new_socket , data , strlen(data) , 0 ); 
+char* ServerTCP::readSocket(int client) {
+    THIS valread = read(client , buffer, 1024); 
+    return buffer;
+}
+
+void ServerTCP::sendMsg(const char* data) {
+    send(THIS new_socket , data , strlen(data) , 0 ); 
 }
 
 int ServerTCP::getFD() {
     return THIS server_fd;
+}
+
+int ServerTCP::getClientFD() {
+    return THIS new_socket;
+}
+
+void ServerTCP::closeSocket() {
+    close(THIS server_fd);
+    if(THIS new_socket) close(THIS new_socket);
 }

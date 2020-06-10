@@ -6,11 +6,17 @@ Proyecto para el control de un motor simulado.
 * Gomez Nicolas
 
 ### Utilizacion
-* Ejecutar el archivo `main3_gui.py`.
-* utilizar el deslizador para determinar el torque del motor simulado.
+* Ejecutar dentro de la carpeta cpp `make pid_server`.
+* Ejecutar el archivo `server` generado con el comando anterior.
+* En otra consola ejecutar dentro de la carpeta python el archivo `main3_gui.py`.
+* utilizar el deslizador para determinar la velocidad deseada del motor simulado, kp, ki y kd.
 
-### Clases
+### Clases Python
 * **MotorControl**: Se encarga del deslizador y mostrar la velocidad.
-* **Motor**: Clase que define los metodos basicos del motor
-* **Motor_Simulated**: Clase que imlementa `Motor` y simula el comportamiento del motor.
 * **Graph**: Clase que se encarga del manejo del grafico temporal.
+
+### Clases C++
+* **rtc**: se encarga de gestionar la configuracion del rtc.
+* **PID**: se encarga de realizar todos los controles para obtener la velocidad deseada.
+* **ServerTCP**: se encarga de gestionar las conexiones, de enviar y recibir datos para facilitar la utilizacion de sockets.
+* **Motor**: se encarga de la simulacion del motor.

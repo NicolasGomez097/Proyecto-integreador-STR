@@ -3,17 +3,19 @@
 class PID {
     public:
         PID (float kp, float ki, float kd);
-        void setSpeed (float);
+        void setDesiredSpeed (float);
+        float getDesiredSpeed ();
         float getActualSpeed ();
         void setActualSpeed (float);
         void setKp (float);
         void setKi (float);
         void setKd (float);
         void setDt (float);
+        float getTorque ();
         float calculateTorque ();
         
     private:
-        float speed;
+        float desiredSpeed;
         float actualSpeed;
         float kp;
         float ki;
@@ -21,5 +23,6 @@ class PID {
         float dt;
         float lastError;
         float acumulatedError;
+        float torque;
 };
 #endif

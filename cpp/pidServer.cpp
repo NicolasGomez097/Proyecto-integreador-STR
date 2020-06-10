@@ -1,28 +1,73 @@
 #include <stdio.h>
 #include <sys/select.h>
+#include <string>
+#include <vector>
 
 #include "rtc/rtc.h"
 #include "pid/PID.h"
 #include "socket/socket.h"
+#include "motor/motor.h"
+
+#define MOTOR_MAX_SPEED 210.0
+#define MOTOR_SENSITIVITY 7.0/255.0
+#define MOTOR_UPDATE_TIMES 100
+
+using namespace std;
+
+/*
+    Protocolo de comunicacion
+ El servidor PID espera que se envie un paquete TCP con
+el contenido en formato texto plano y con las siguiente
+informacion separado por ',':
+    Velocidad deseada,Kp,Ki,Kd.
+ 
+ Luego manda una respuesta con el mismo formato que contiene
+las siguiente informacion:
+    velocidad actual,torque actual.
+*/
+
+vector<string> substring(string text) {
+    vector<string> strings;
+    string aux = "";
+    for(int i = 0; i < text.length(); i++) {
+        if(text[i] == ',') {
+            strings.push_back(aux);
+            aux = "";
+        } else {
+            aux.push_back(text[i]);
+        }
+    }
+    if(aux.compare("") != 0) {
+        strings.push_back(aux);
+    }
+    return strings;
+}
+
+string processRequest(string request, PID& pid);
 
 int main() {
     // Definicion variables.
     int cant = 30;
     int i, tick_fd, res;
+    int max_fd;
+    int client_fd = 0;
+    float actualSpeed;
+    float actualTorque;
     fd_set readfds;
-    PID pid(0.0, 0.0, 0.0);
+
+    PID pid(100.0/40.0, 0.0, 0.0);
+    pid.setDt(1000.0 / MOTOR_UPDATE_TIMES);
+    Motor motor(MOTOR_MAX_SPEED, MOTOR_SENSITIVITY);
     ServerTCP server;
 
     struct timeval timeout = {1, 0};
-    tick_fd = rtc_init(1);
+    tick_fd = rtc_init(MOTOR_UPDATE_TIMES);
 
     // inicializacion socket TCP
     server.initSocketServer();
     
     printf("Server FD: %d\n", server.getFD());
-    fflush(stdout);
-
-    
+    fflush(stdout); 
 
     while (true)
     {
@@ -30,21 +75,52 @@ int main() {
         FD_ZERO(&readfds);
         FD_SET(tick_fd, &readfds);
         FD_SET(server.getFD(), &readfds);
+        max_fd = server.getFD() + 1;
+        if(client_fd != 0) {
+            FD_SET(client_fd, &readfds); 
+            max_fd = client_fd + 1; 
+        }
 
-        res = select(5, &readfds, NULL, NULL, NULL);
+        res = select(max_fd, &readfds, NULL, NULL, NULL);
  
         if(FD_ISSET(tick_fd, &readfds)) {
-            printf("*");
-            fflush(stdout);
+            actualSpeed = motor.getSpeed();
+            pid.setActualSpeed(actualSpeed);
+            actualTorque = pid.calculateTorque();
+            /*printf("%.2f %.2f\n", pid.getActualSpeed(), actualTorque);
+            fflush(stdout);*/
+            motor.setTorque(actualTorque);
             rtc_tick();
         }
         if (FD_ISSET(server.getFD(), &readfds)) {
-            char* msg = server.readSocket();
-            server.sendMsg("Response");
-            printf("%s\n", msg);
-            fflush(stdout);
+            client_fd = server.acceptConnection();
+            
+            string msg = server.readSocket(client_fd);
+            string response = processRequest(msg, pid);     
+            server.sendMsg(response.c_str());
+        }
+        if (FD_ISSET(client_fd, &readfds)) {
+            string msg = server.readSocket(client_fd);
+            string response = processRequest(msg, pid);            
+            server.sendMsg(response.c_str());
         }
     }
     printf("\n");
     rtc_close();
+    server.closeSocket();
+}
+
+string processRequest(string request, PID& pid) {
+    vector<string> values = substring(request);
+
+    pid.setDesiredSpeed(atof(values[0].c_str()));
+    pid.setKp(atof(values[1].c_str()));
+    pid.setKi(atof(values[2].c_str()));
+    pid.setKd(atof(values[3].c_str()));
+
+
+    string response = to_string(pid.getActualSpeed());
+    response.push_back(',');
+    response.append(to_string(pid.getTorque()));
+    return response;
 }

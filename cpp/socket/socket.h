@@ -3,9 +3,12 @@
 class ServerTCP {
     public:
         void initSocketServer();
-        char* readSocket();
-        void sendMsg(char* data);
+        int acceptConnection();
+        char* readSocket(int client);
+        void sendMsg(const char* data);
         int getFD();
+        int getClientFD();
+        void closeSocket();
 
     private:
         int server_fd;
