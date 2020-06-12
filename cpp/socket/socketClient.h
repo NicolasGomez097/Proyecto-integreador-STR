@@ -1,9 +1,8 @@
-#ifndef SOCKET_SERVER_H
-#define SOCKET_SERVER_H
-class ServerTCP {
+#ifndef SOCKET_CLIENT_H
+#define SOCKET_CLIENT_H
+class ClientSocket {
     public:
-        void initSocketServer();
-        int acceptConnection();
+        void initConection(char *host, int port, bool useTCP);
         std::string readSocket(int client);
         void sendMsg(const char* data);
         int getFD();
@@ -11,8 +10,8 @@ class ServerTCP {
         void closeSocket();
 
     private:
-        int server_fd;
-        int new_socket;
+        int client_fd;
         int valread;
+
 };
 #endif

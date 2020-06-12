@@ -5,17 +5,15 @@
 #include <stdlib.h> 
 #include <netinet/in.h> 
 #include <string.h> 
+#include <string> 
 #include "socket.h"
 
 #define PORT 8080 
 #define THIS this->
 
 struct sockaddr_in address; 
-int opt = 1; 
 int addrlen = sizeof(address); 
-char buffer[1024] = {0}; 
-const char *hello = "Hello from server";
- 
+
 void ServerTCP::initSocketServer() {
     // Creating socket file descriptor 
     if ((THIS server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) 
@@ -23,6 +21,10 @@ void ServerTCP::initSocketServer() {
         perror("socket failed"); 
         exit(EXIT_FAILURE); 
     } 
+
+
+    int opt = 1; 
+    const char *hello = "Hello from server";
        
     // Forcefully attaching socket to the port 8080 
     if (setsockopt(THIS server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, 
@@ -60,9 +62,11 @@ int ServerTCP::acceptConnection() {
     return THIS new_socket;
 }
 
-char* ServerTCP::readSocket(int client) {
+std::string ServerTCP::readSocket(int client) {
+    char buffer[1024] = {0}; 
     THIS valread = read(client , buffer, 1024); 
-    return buffer;
+    std::string aux = buffer;
+    return aux;
 }
 
 void ServerTCP::sendMsg(const char* data) {

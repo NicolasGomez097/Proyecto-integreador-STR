@@ -4,10 +4,15 @@ import select
 
 
 class SocketClient():
-    def __init__(self, host, port):
+    def __init__(self, host, port, protocol = 'TCP'):
         self.host = host
         self.port = port
-        self.socket = skt.socket(skt.AF_INET, skt.SOCK_STREAM)
+        if protocol == 'TCP':
+            self.socket = skt.socket(skt.AF_INET, skt.SOCK_STREAM)
+        elif protocol == 'UDP':
+            self.socket = skt.socket(skt.AF_INET, skt.SOCK_DGRAM)
+        else:
+            return
         GLib.io_add_watch(self.socket.fileno(), GLib.IO_IN, self.on_read)
         self.socket.connect((self.host, self.port))
         self.socket.setblocking(False)

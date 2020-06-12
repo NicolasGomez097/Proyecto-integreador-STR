@@ -2,9 +2,9 @@ rtc_demo: demo.cpp rtc.o pid.o
 	gcc demo.cpp rtc.o pid.o -o demo
 	make -s clean
 
-pid_server: pidServer.cpp rtc.o pid.o socket.o motor.o
+pid_server: pidServer.cpp rtc.o pid.o socket.o motor.o socketClient.o
 	g++ pidServer.cpp \
-		rtc.o pid.o socket.o motor.o \
+		rtc.o pid.o socket.o motor.o socketClient.o \
 		-o server;
 	make -s clean 
 
@@ -16,6 +16,9 @@ pid.o: pid/PID.cpp pid/PID.h
 
 socket.o:
 	g++ socket/socket.cpp -c -o socket.o
+
+socketClient.o:
+	g++ socket/socketClient.cpp -c -o socketClient.o
 
 motor.o:
 	g++ motor/motor.cpp -c -o motor.o
