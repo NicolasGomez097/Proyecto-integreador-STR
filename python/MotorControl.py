@@ -44,7 +44,7 @@ class MotorControl(Gtk.Grid):
         text.set_margin_top(20)
         self.attach(text, 3, 1, 1, 1)
 
-        sliderki = Gtk.Scale.new_with_range(Gtk.Orientation.VERTICAL, 0.00, 20.0, 0.01)
+        sliderki = Gtk.Scale.new_with_range(Gtk.Orientation.VERTICAL, 0.00, 0.005, 0.0001)
         sliderki.set_margin_start(20)
         sliderki.set_margin_end(20)
         sliderki.set_margin_top(20)
@@ -60,7 +60,7 @@ class MotorControl(Gtk.Grid):
         text.set_margin_top(20)
         self.attach(text, 4, 1, 1, 1)
 
-        sliderkd = Gtk.Scale.new_with_range(Gtk.Orientation.VERTICAL, 0.00, 20.0, 0.01)
+        sliderkd = Gtk.Scale.new_with_range(Gtk.Orientation.VERTICAL, 0.00, 100.0, 0.01)
         sliderkd.set_margin_start(20)
         sliderkd.set_margin_end(20)
         sliderkd.set_margin_top(20)
@@ -71,6 +71,7 @@ class MotorControl(Gtk.Grid):
         self.sliderkd = sliderkd
         self.attach(sliderkd, 4, 2, 1, 1)
 
+        # Texto velocidad
         text = Gtk.Label('Velocidad')
         text.set_margin_top(20)
         self.attach(text, 1, 3, 1, 1)
@@ -78,6 +79,15 @@ class MotorControl(Gtk.Grid):
         self.velocidad = Gtk.Label('')
         self.velocidad.set_margin_bottom(20)
         self.attach(self.velocidad, 1, 4, 1, 1)
+
+        # Texto torque
+        text = Gtk.Label('Torque')
+        text.set_margin_top(20)
+        self.attach(text, 2, 3, 1, 1)
+
+        self.torque = Gtk.Label('')
+        self.torque.set_margin_bottom(20)
+        self.attach(self.torque, 2, 4, 1, 1)
 
     def set_on_change(self, callback, *args):
         self.sliderSpeed.connect('value-changed', callback, *args)
@@ -88,6 +98,9 @@ class MotorControl(Gtk.Grid):
     def set_velocidad_txt(self, velocidad):
         self.velocidad.set_text('{:.2f}'.format(velocidad))
     
+    def set_torque_txt(self, torque):
+        self.torque.set_text('{:.2f}'.format(torque))
+
     def get_desired_speed(self):
         return self.sliderSpeed.get_value()
 

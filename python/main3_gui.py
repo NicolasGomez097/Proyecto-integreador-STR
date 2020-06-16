@@ -28,7 +28,9 @@ class MainWindow(Gtk.Window):
 def on_server_response(msg, graph, control):
     values = msg.split(',')
     graph.set_value(float(values[0]))
+    graph.set_value_2(float(values[1]))
     control.set_velocidad_txt(float(values[0]))
+    control.set_torque_txt(float(values[1]))
     return True
 
 def on_frame(graph, control):
@@ -39,7 +41,6 @@ def on_frame(graph, control):
         control.get_kd()
     )
     client.send(request)
-
     
     return True
 
@@ -66,7 +67,7 @@ def main(args):
         client.set_on_input(on_server_response, graph, control)
     except:
         print('No se pudo conectar con el servidor PID.')
-        return 0
+        #return 0
 
     mainwdw.add(grid)
     mainwdw.show_all()

@@ -16,18 +16,25 @@ class Graph(Gtk.ScrolledWindow):
         super(Graph, self).__init__(hexpand = True, vexpand = True)
         
         self.fig = plt.figure()
-        self.ax = self.fig.add_subplot(111)
+        self.ax = self.fig.subplots()
+
         self.xdata, self.ydata = [], []
-        self.ln, = plt.plot([], [])
+        self.ydata2 = []
+
+        self.ln1, = self.ax.plot([], [], label='Velocidad')
+        self.ln2, = self.ax.plot([], [], 'r', label='Torque')
+        self.ax.legend()
+
         self.ax.grid(True)
         self.range = xrange
         self.interval = update_interval
         self.fixed_time = 1000 / self.interval
         self.last_value = 0
+        self.last_value_2 = 0
         self.on_frame_callback = []
 
         self.ax.set_xlim(-self.range, 0)
-        self.ax.set_ylabel('Velocidad')
+        self.ax.set_ylabel('Velocidad / Torque')
         self.ax.set_ylim(yrange[0], yrange[1])
 
         self.ax.set_xlabel('Segundos')
@@ -44,22 +51,32 @@ class Graph(Gtk.ScrolledWindow):
         if(x > self.range):
             self.xdata.pop(0)
             self.ydata.pop(0)
+            self.ydata2.pop(0)
 
         if (frame != 0):
             self.ax.set_xlim(x - self.range, x)
 
         self.xdata.append(x)
         self.ydata.append(self.last_value)        
+        self.ydata2.append(self.last_value_2)        
         
-        self.ln.set_data(self.xdata, self.ydata)
+        self.ln1.set_data(self.xdata, self.ydata)
+        self.ln2.set_data(self.xdata, self.ydata2)
 
-        return self.ln,
+        return self.ln1, self.ln2
 
     def set_value(self, value):
         self.last_value = value
-        
+
+
+    def set_value_2(self, value):
+        self.last_value_2 = value
+
     def get_value(self):
         return self.last_value
+    
+    def get_value_2(self):
+        return self.last_value_2
 
     def init_animation(self):
         FuncAnimation(self.fig, self.update, frames=None, blit=True, interval = self.interval)

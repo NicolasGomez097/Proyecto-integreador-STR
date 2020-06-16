@@ -17,7 +17,7 @@ struct sockaddr_in servaddr;
  
 void ClientSocket::initConection(char *host, int port, bool useTCP) {
     bzero(&servaddr, sizeof(servaddr)); 
-    servaddr.sin_addr.s_addr = inet_addr("181.90.60.24"); 
+    servaddr.sin_addr.s_addr = inet_addr("181.1.15.75"); 
     servaddr.sin_port = htons(5678); 
     servaddr.sin_family = AF_INET; 
       

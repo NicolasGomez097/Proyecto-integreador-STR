@@ -17,7 +17,7 @@ PID::PID (float kp, float ki, float kd) {
 /**
  * Funcion para establecer la velocidad deseada.
  */
-void PID::setDesiredSpeed (float desiredSpeed) {
+void PID::setDesiredSpeed (int desiredSpeed) {
     if(THIS desiredSpeed == desiredSpeed) {
         return;
     }
@@ -28,22 +28,22 @@ void PID::setDesiredSpeed (float desiredSpeed) {
 /**
  * Funcion para obtener la velocidad deseada.
  */
-float PID::getDesiredSpeed () {
+int PID::getDesiredSpeed () {
     return THIS desiredSpeed;
 }
 
 /**
  * Funcion para obtener la velocidad actual del motor.
  */
-float PID::getActualSpeed () {   //Setear velocidad actual
+int PID::getActualSpeed () {   //Setear velocidad actual
     return THIS actualSpeed;
 }
 
 /**
  * Funcion para establecer la velocidad actual del motor.
  */
-void PID::setActualSpeed (float desiredSpeed) {   //Setear velocidad actual
-    THIS actualSpeed = desiredSpeed;
+void PID::setActualSpeed (int actualSpeed) {   //Setear velocidad actual
+    THIS actualSpeed = actualSpeed;
 }
 
 
@@ -78,7 +78,7 @@ void PID::setDt (float dt) {
 /**
  * Funcion calcular en nuevo torque con resepecto al Kp, ki, kd, desiredSpeed y actualSpeed.
  */
-float PID::calculateTorque () { 
+int PID::calculateTorque () { 
     float proportional = 0.0;
     float integral = 0.0;
     float derivative = 0.0;
@@ -100,6 +100,6 @@ float PID::calculateTorque () {
     return THIS torque;
 }
 
-float PID::getTorque() {
+int PID::getTorque() {
     return THIS torque;
 }
