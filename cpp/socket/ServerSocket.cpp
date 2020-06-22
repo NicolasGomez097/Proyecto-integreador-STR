@@ -6,7 +6,7 @@
 #include <netinet/in.h> 
 #include <string.h> 
 #include <string> 
-#include "socket.h"
+#include "ServerSocket.h"
 
 #define PORT 8080 
 #define THIS this->
@@ -14,7 +14,7 @@
 struct sockaddr_in address; 
 int addrlen = sizeof(address); 
 
-void ServerTCP::initSocketServer() {
+void ServerSocket::initSocketServer() {
     // Creating socket file descriptor 
     if ((THIS server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) 
     { 
@@ -51,7 +51,7 @@ void ServerTCP::initSocketServer() {
     }  
 }
 
-int ServerTCP::acceptConnection() {
+int ServerSocket::acceptConnection() {
     if ((THIS new_socket = accept(
             THIS server_fd, (struct sockaddr *)&address,  
                       (socklen_t*)&addrlen)
@@ -62,26 +62,26 @@ int ServerTCP::acceptConnection() {
     return THIS new_socket;
 }
 
-std::string ServerTCP::readSocket(int client) {
+std::string ServerSocket::readSocket(int client) {
     char buffer[1024] = {0}; 
     THIS valread = read(client , buffer, 1024); 
     std::string aux = buffer;
     return aux;
 }
 
-void ServerTCP::sendMsg(const char* data) {
+void ServerSocket::sendMsg(const char* data) {
     send(THIS new_socket , data , strlen(data) , 0 ); 
 }
 
-int ServerTCP::getFD() {
+int ServerSocket::getFD() {
     return THIS server_fd;
 }
 
-int ServerTCP::getClientFD() {
+int ServerSocket::getClientFD() {
     return THIS new_socket;
 }
 
-void ServerTCP::closeSocket() {
+void ServerSocket::closeSocket() {
     close(THIS server_fd);
     if(THIS new_socket) close(THIS new_socket);
 }

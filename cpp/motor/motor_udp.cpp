@@ -1,20 +1,20 @@
-#include "motor.h"
-#include "socket/socketClient.h"
+#include <string>
+#include "motor_udp.h"
+#include "../utils/utils.h"
 
 #define THIS this->
 
-Motor::Motor (float maxSpeed, float sensitivity) {
-    THIS maxSpeed = maxSpeed;
-    THIS sensitivity = sensitivity;
-    THIS torque = 0;
-}
 
-void Motor::setMaxSpeed (float maxSpeed) {
-    THIS maxSpeed = maxSpeed;
+Motor::Motor (char* host, int port, bool isTCP) {
+    THIS torque = 0;
+    THIS connection.initConection(host, port, isTCP);
 }
 
 void Motor::setTorque (float torque) {
     THIS torque = torque;
+    std::string msg = "torque,";
+    msg.append(std::to_string(int(torque)));
+    THIS connection.sendMsg(msg.c_str());
 }
 
 float Motor::getTorque () {
@@ -22,8 +22,12 @@ float Motor::getTorque () {
 }
 
 float Motor::getSpeed() {
-    float finalVelocity = THIS maxSpeed * (1.0 - exp(-THIS torque * THIS sensitivity));
-    THIS speed = lerp(THIS speed, finalVelocity, ACCELERATION);
-    
+    std::string msg = THIS connection.readSocket(THIS connection.getFD());
+    msg = substring(msg)[1];
+    THIS speed = atof(msg.c_str());
     return THIS speed;
+}
+
+int Motor::getFD() {
+    return THIS connection.getFD();
 }

@@ -6,17 +6,24 @@
 
 #include "rtc/rtc.h"
 #include "pid/PID.h"
-#include "socket/socket.h"
-#include "socket/socketClient.h"
-#include "motor/motor.h"
+#include "socket/ServerSocket.h"
+#include "motor/motor_udp.h"
+#include "utils/utils.h"
+#include "select/SelectManager.h"
 
-#define MOTOR_MAX_SPEED 210.0
-#define MOTOR_SENSITIVITY 7.0/255.0
-#define MOTOR_UPDATE_TIMES 10000
-//#define MOTOR_UPDATE_TIMES 10
+// Definiciones para el motor simulado.
+//#define MOTOR_MAX_SPEED 210.0
+//#define MOTOR_SENSITIVITY 7.0/255.0
+
+// Cantidad de actualizaciones por segundo con el motor.
+#define MOTOR_UPDATE_TIMES 64
+
+// Definiciones para la conexion con el motor remoto.
+#define MOTOR_HOST "181.1.105.222"
+#define MOTOR_PORT 5678
+#define MOTOR_IS_TCP false
 
 using namespace std;
-
 /*
     Protocolo de comunicacion
  El servidor PID espera que se envie un paquete TCP con
@@ -28,24 +35,6 @@ informacion separado por ',':
 las siguiente informacion:
     velocidad actual,torque actual.
 */
-
-vector<string> substring(string text) {
-    vector<string> strings;
-    string aux = "";
-    for(int i = 0; i < text.length(); i++) {
-        if(text[i] == ',') {
-            strings.push_back(aux);
-            aux = "";
-        } else {
-            aux.push_back(text[i]);
-        }
-    }
-    if(aux.compare("") != 0) {
-        strings.push_back(aux);
-    }
-    return strings;
-}
-
 string processRequest(string request, PID& pid);
 
 int main() {
@@ -58,24 +47,27 @@ int main() {
     float actualTorque = 0;
     fd_set readfds;
     vector<int> fd_set;
+   
+    PID pid(100.0 / 40.0, 0.0, 0.0);
+    pid.setDt(1.0 / MOTOR_UPDATE_TIMES);
 
-    PID pid(100.0/40.0, 0.0, 0.0);
-    pid.setDt(1000.0 / MOTOR_UPDATE_TIMES);
-    Motor motor(MOTOR_MAX_SPEED, MOTOR_SENSITIVITY);
-    ServerTCP server;
-    ClientSocket motorSocket;
+    Motor motor(MOTOR_HOST, MOTOR_PORT, MOTOR_IS_TCP);
 
+    ServerSocket server;
+
+    SelectManager selectManager;
+
+    // Configuracion RTC
     struct timeval timeout = {1, 0};
     tick_fd = rtc_init(MOTOR_UPDATE_TIMES);
-    fd_set.push_back(tick_fd);
+    selectManager.addReadFD(tick_fd);
+
     // inicializacion socket TCP
     server.initSocketServer();
-    fd_set.push_back(server.getFD());
+    selectManager.addReadFD(server.getFD());
     
-    // Conexion con el motor UDP
-    char *host = "181.90.60.24";
-    motorSocket.initConection(host,5678,false);
-    fd_set.push_back(motorSocket.getFD());
+    // Se agrega el FD del motor a la lista.
+    selectManager.addReadFD(motor.getFD());
 
     printf("Server FD: %d\n", server.getFD());
     fflush(stdout); 
@@ -83,51 +75,32 @@ int main() {
     while (true)
     {
         // Inicializando el SET para el select
-        FD_ZERO(&readfds);
-        FD_SET(tick_fd, &readfds);
-        FD_SET(motorSocket.getFD(), &readfds);
-        FD_SET(server.getFD(), &readfds);
-        if(client_fd != 0) {
-            FD_SET(client_fd, &readfds); 
-            max_fd = client_fd + 1; 
-        }
-        max_fd = 0;
-        for(int i = 0; i < fd_set.size(); i++) {
-            if(max_fd < fd_set[i]) {
-                max_fd = fd_set[i];
-            }
-        }
-        max_fd++;
-        
-        res = select(max_fd, &readfds, NULL, NULL, NULL);
+        if(!isSocketOpen(client_fd)){
+            selectManager.removeFD(client_fd);
+        } 
+        selectManager.waitForSelect();
  
-        if(FD_ISSET(tick_fd, &readfds)) {
+        if(selectManager.wasTrigger(tick_fd)) {
             actualTorque = pid.calculateTorque();
-
-            string msg = "torque,";
-            msg.append(to_string(int(actualTorque)));
-            motorSocket.sendMsg(msg.c_str());
-
+            motor.setTorque(actualTorque);
             rtc_tick();
         }
-        if (FD_ISSET(server.getFD(), &readfds)) {
+        if (selectManager.wasTrigger(server.getFD())) {
             client_fd = server.acceptConnection();
             
-            fd_set.push_back(client_fd);
+            selectManager.addReadFD(client_fd);
             string msg = server.readSocket(client_fd);
             string response = processRequest(msg, pid);     
             
             server.sendMsg(response.c_str());
         }
-        if (FD_ISSET(client_fd, &readfds)) {
+        if (selectManager.wasTrigger(client_fd)) {
             string msg = server.readSocket(client_fd);
             string response = processRequest(msg, pid);            
             server.sendMsg(response.c_str());
         }
-        if (FD_ISSET(motorSocket.getFD(), &readfds)) {
-            string msg = motorSocket.readSocket(motorSocket.getFD());
-            msg = substring(msg)[1];
-            pid.setActualSpeed(atoi(msg.c_str()));
+        if (selectManager.wasTrigger(motor.getFD())) {
+            pid.setActualSpeed(motor.getSpeed());
         }
     }
     printf("\n");

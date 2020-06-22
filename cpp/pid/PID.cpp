@@ -22,7 +22,7 @@ void PID::setDesiredSpeed (int desiredSpeed) {
         return;
     }
     THIS desiredSpeed = desiredSpeed;
-    THIS acumulatedError = 0.0;
+    //THIS acumulatedError = 0.0;
 }
 
 /**
@@ -83,19 +83,27 @@ int PID::calculateTorque () {
     float integral = 0.0;
     float derivative = 0.0;
     float error = THIS desiredSpeed - THIS actualSpeed;
+    float dError = error - THIS lastError;
+    /*if(dError < 0){
+        dError*= -1;
+    } */
     
     proportional = THIS kp * THIS desiredSpeed;
     
     THIS acumulatedError += error;
     integral = THIS ki * THIS acumulatedError * THIS dt;
     
-    derivative = THIS kd * (error - THIS lastError) / THIS dt;
+    derivative = THIS kd * dError / THIS dt;
+
     THIS lastError = error;
     
     THIS torque = proportional + integral + derivative;
     
     if (THIS torque < 0) {
         THIS torque = 0;
+    }
+    if (THIS torque > 255) {
+        THIS torque = 255;
     }
     return THIS torque;
 }

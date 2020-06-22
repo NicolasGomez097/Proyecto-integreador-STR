@@ -8,7 +8,7 @@
 #include <string> 
 #include <arpa/inet.h> 
 
-#include "socketClient.h"
+#include "ClientSocket.h"
 
 #define PORT 8080 
 #define THIS this->
@@ -17,8 +17,8 @@ struct sockaddr_in servaddr;
  
 void ClientSocket::initConection(char *host, int port, bool useTCP) {
     bzero(&servaddr, sizeof(servaddr)); 
-    servaddr.sin_addr.s_addr = inet_addr("181.1.15.75"); 
-    servaddr.sin_port = htons(5678); 
+    servaddr.sin_addr.s_addr = inet_addr(host); 
+    servaddr.sin_port = htons(port); 
     servaddr.sin_family = AF_INET; 
       
     // create datagram socket 

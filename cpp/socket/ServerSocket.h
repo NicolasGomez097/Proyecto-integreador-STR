@@ -1,6 +1,6 @@
 #ifndef SOCKET_SERVER_H
 #define SOCKET_SERVER_H
-class ServerTCP {
+class ServerSocket {
     public:
         void initSocketServer();
         int acceptConnection();

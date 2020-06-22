@@ -51,7 +51,7 @@ def main(args):
     mainwdw = MainWindow()
     grid = Gtk.Grid(hexpand = True, vexpand = True)
     
-    graph = Graph((0, 255), 10, UPDATE_INTERVAL)
+    graph = Graph((0, 150), 10, UPDATE_INTERVAL)
     graph.init_animation()
     grid.attach(graph, 2, 1, 1, 1)
 
@@ -67,7 +67,7 @@ def main(args):
         client.set_on_input(on_server_response, graph, control)
     except:
         print('No se pudo conectar con el servidor PID.')
-        #return 0
+        return 0
 
     mainwdw.add(grid)
     mainwdw.show_all()
