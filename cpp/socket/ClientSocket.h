@@ -12,6 +12,5 @@ class ClientSocket {
     private:
         int client_fd;
         int valread;
-
 };
 #endif

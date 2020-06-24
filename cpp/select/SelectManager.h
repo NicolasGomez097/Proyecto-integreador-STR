@@ -11,7 +11,6 @@ private:
     fd_set readfds;
     std::vector<int> fd_set_vector;
 public:
-    //SelectManager();
     void addReadFD(int fd);
     int waitForSelect();
     bool wasTrigger(int fd);

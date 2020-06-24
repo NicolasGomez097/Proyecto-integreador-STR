@@ -12,7 +12,7 @@ class MotorControl(Gtk.Grid):
         text.set_margin_top(20)
         self.attach(text, 1, 1, 1, 1)
 
-        slider = Gtk.Scale.new_with_range(Gtk.Orientation.VERTICAL, min, max, 1.0)
+        slider = Gtk.Scale.new_with_range(Gtk.Orientation.VERTICAL, min, max, 20)
         slider.set_margin_start(20)
         slider.set_margin_end(20)
         slider.set_margin_top(20)
@@ -115,3 +115,9 @@ class MotorControl(Gtk.Grid):
 
     def set_kp(self, value):
         self.sliderkp.set_value(value)
+    
+    def set_ki(self, value):
+        self.sliderki.set_value(value)
+
+    def set_kd(self, value):
+        self.sliderkd.set_value(value)

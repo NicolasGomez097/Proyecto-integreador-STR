@@ -3,7 +3,7 @@
 
 
 #define THIS this->
-#define ACCELERATION 0.005 // Velocidad de reaccion del motor, 0 < ACCELERATION <= 1;
+#define ACCELERATION 0.02 // Velocidad de reaccion del motor, 0 < ACCELERATION <= 1;
 
 float lerp(float v1, float v2, float t);
 

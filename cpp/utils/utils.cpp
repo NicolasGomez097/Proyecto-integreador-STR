@@ -17,10 +17,6 @@ std::vector<std::string> substring(std::string text) {
     return strings;
 }
 
-bool isSocketOpen(int socket_fd) { 
-    return fcntl(socket_fd, F_GETFL) != -1;
-} 
-
 int getIndexOfInt(std::vector<int> vector, int value) {
     for(int i = 0; i < vector.size(); i++) {
         if(vector[i] == value){

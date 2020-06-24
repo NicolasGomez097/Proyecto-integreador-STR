@@ -12,7 +12,7 @@ class ServerSocket {
 
     private:
         int server_fd;
-        int new_socket;
+        int client_fd;
         int valread;
 };
 #endif

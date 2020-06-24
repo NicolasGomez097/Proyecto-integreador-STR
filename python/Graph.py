@@ -14,23 +14,27 @@ class Graph(Gtk.ScrolledWindow):
         update_interval = 50
     ):
         super(Graph, self).__init__(hexpand = True, vexpand = True)
+
+        self.range = xrange
+        self.interval = update_interval
+        self.last_velocidad = 0
+        self.last_torque = 0
+        self.last_vel_deseada = 0
+        self.last_time = 0
         
         self.fig = plt.figure()
         self.ax = self.fig.subplots()
 
-        self.xdata, self.ydata = [], []
-        self.ydata2 = []
+        self.xdata, self.ydata_velocidad = [], []
+        self.ydata_torque = []
+        self.ydata_vel_deseada = []
 
-        self.ln1, = self.ax.plot([], [], label='Velocidad')
-        self.ln2, = self.ax.plot([], [], 'r', label='Torque')
+        self.ln_velocidad, = self.ax.plot([], [], label='Velocidad')
+        self.ln_torque, = self.ax.plot([], [], label='Torque')
+        self.ln_vel_deseada, = self.ax.plot([], [], 'r', label='Velocidad deseada')
         self.ax.legend()
-
         self.ax.grid(True)
-        self.range = xrange
-        self.interval = update_interval
-        self.fixed_time = 1000 / self.interval
-        self.last_value = 0
-        self.last_value_2 = 0
+
         self.on_frame_callback = []
 
         self.ax.set_xlim(-self.range, 0)
@@ -46,40 +50,44 @@ class Graph(Gtk.ScrolledWindow):
         for callback, *args in self.on_frame_callback:
             callback(*args)
 
-        x = frame / self.fixed_time
+        time = frame * self.interval / 1000
 
-        if(x > self.range):
+        if(time > self.range):
             self.xdata.pop(0)
-            self.ydata.pop(0)
-            self.ydata2.pop(0)
+            self.ydata_velocidad.pop(0)
+            self.ydata_torque.pop(0)
+            self.ydata_vel_deseada.pop(0)
 
         if (frame != 0):
-            self.ax.set_xlim(x - self.range, x)
+            self.ax.set_xlim(time - self.range, time)
 
-        self.xdata.append(x)
-        self.ydata.append(self.last_value)        
-        self.ydata2.append(self.last_value_2)        
+        self.xdata.append(time)
+        self.ydata_velocidad.append(self.last_velocidad)        
+        self.ydata_torque.append(self.last_torque)        
+        self.ydata_vel_deseada.append(self.last_vel_deseada)        
         
-        self.ln1.set_data(self.xdata, self.ydata)
-        self.ln2.set_data(self.xdata, self.ydata2)
+        self.ln_velocidad.set_data(self.xdata, self.ydata_velocidad)
+        self.ln_torque.set_data(self.xdata, self.ydata_torque)
+        self.ln_vel_deseada.set_data(self.xdata, self.ydata_vel_deseada)
 
-        return self.ln1, self.ln2
+        self.last_time = time
 
-    def set_value(self, value):
-        self.last_value = value
+        return self.ln_vel_deseada , self.ln_torque, self.ln_velocidad
 
+    def set_velocidad(self, value):
+        self.last_velocidad = value
 
-    def set_value_2(self, value):
-        self.last_value_2 = value
+    def set_torque(self, value):
+        self.last_torque = value
 
-    def get_value(self):
-        return self.last_value
-    
-    def get_value_2(self):
-        return self.last_value_2
+    def set_vel_deseada(self, value):
+        self.last_vel_deseada = value
 
     def init_animation(self):
         FuncAnimation(self.fig, self.update, frames=None, blit=True, interval = self.interval)
+    
+    def get_last_time(self):
+        return self.last_time
 
     def add_on_frame(self, callback, *args):
         self.on_frame_callback.append(

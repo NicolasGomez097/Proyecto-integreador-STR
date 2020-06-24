@@ -1,6 +1,4 @@
 #include "PID.h"
-#include <stdio.h>
-
 
 #define THIS this->
 
@@ -84,18 +82,14 @@ int PID::calculateTorque () {
     float derivative = 0.0;
     float error = THIS desiredSpeed - THIS actualSpeed;
     float dError = error - THIS lastError;
-    /*if(dError < 0){
-        dError*= -1;
-    } */
-    
+    THIS acumulatedError += error;
+    THIS lastError = error;
+
     proportional = THIS kp * THIS desiredSpeed;
     
-    THIS acumulatedError += error;
     integral = THIS ki * THIS acumulatedError * THIS dt;
     
     derivative = THIS kd * dError / THIS dt;
-
-    THIS lastError = error;
     
     THIS torque = proportional + integral + derivative;
     

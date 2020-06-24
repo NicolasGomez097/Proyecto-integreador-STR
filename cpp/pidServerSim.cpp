@@ -7,21 +7,16 @@
 #include "rtc/rtc.h"
 #include "pid/PID.h"
 #include "socket/ServerSocket.h"
-#include "motor/motor_udp.h"
+#include "motor/motor.h"
 #include "utils/utils.h"
 #include "select/SelectManager.h"
 
 // Definiciones para el motor simulado.
-//#define MOTOR_MAX_SPEED 210.0
-//#define MOTOR_SENSITIVITY 7.0/255.0
+#define MOTOR_MAX_SPEED 210.0
+#define MOTOR_SENSITIVITY 7.0/255.0
 
 // Cantidad de actualizaciones por segundo con el motor.
 #define MOTOR_UPDATE_TIMES 64
-
-// Definiciones para la conexion con el motor remoto.
-#define MOTOR_HOST "181.90.115.50"
-#define MOTOR_PORT 5678
-#define MOTOR_IS_TCP false
 
 using namespace std;
 /*
@@ -43,7 +38,6 @@ int main() {
     int i, tick_fd, res;
     int max_fd;
     int client_fd = 0;
-    float actualSpeed = 0;
     float actualTorque = 0;
     fd_set readfds;
     vector<int> fd_set;
@@ -51,7 +45,7 @@ int main() {
     PID pid(100.0 / 40.0, 0.0, 0.0);
     pid.setDt(1.0 / MOTOR_UPDATE_TIMES);
 
-    Motor motor(MOTOR_HOST, MOTOR_PORT, MOTOR_IS_TCP);
+    Motor motor(MOTOR_MAX_SPEED, MOTOR_SENSITIVITY);
 
     ServerSocket server;
 
@@ -66,10 +60,7 @@ int main() {
     server.initSocketServer();
     selectManager.addReadFD(server.getFD());
     
-    // Se agrega el FD del motor a la lista.
-    selectManager.addReadFD(motor.getFD());
-
-    printf("Se inicio el server\n");
+    printf("Se inicio el servidor\n");
     fflush(stdout); 
 
     while (true)
@@ -78,6 +69,7 @@ int main() {
         selectManager.waitForSelect();
  
         if(selectManager.wasTrigger(tick_fd)) {
+            pid.setActualSpeed(motor.getSpeed());
             actualTorque = pid.calculateTorque();
             motor.setTorque(actualTorque);
             rtc_tick();
@@ -95,9 +87,6 @@ int main() {
             string msg = server.readSocket(client_fd);
             string response = processRequest(msg, pid);            
             server.sendMsg(response.c_str());
-        }
-        if (selectManager.wasTrigger(motor.getFD())) {
-            pid.setActualSpeed(motor.getSpeed());
         }
     }
     printf("\n");

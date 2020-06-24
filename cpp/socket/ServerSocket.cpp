@@ -1,43 +1,36 @@
 // Server side C/C++ program to demonstrate Socket programming 
 #include <unistd.h> 
-#include <stdio.h> 
 #include <sys/socket.h> 
-#include <stdlib.h> 
 #include <netinet/in.h> 
 #include <string.h> 
 #include <string> 
 #include "ServerSocket.h"
 
-#define PORT 8080 
+#define DEFAULT_PORT 8080 
 #define THIS this->
 
 struct sockaddr_in address; 
 int addrlen = sizeof(address); 
 
 void ServerSocket::initSocketServer() {
-    // Creating socket file descriptor 
     if ((THIS server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) 
     { 
         perror("socket failed"); 
         exit(EXIT_FAILURE); 
     } 
 
-
-    int opt = 1; 
-    const char *hello = "Hello from server";
-       
-    // Forcefully attaching socket to the port 8080 
+    int opt = 1;        
     if (setsockopt(THIS server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, 
                                                   &opt, sizeof(opt))) 
     { 
         perror("setsockopt"); 
         exit(EXIT_FAILURE); 
-    } 
+    }
+
     address.sin_family = AF_INET; 
     address.sin_addr.s_addr = INADDR_ANY; 
-    address.sin_port = htons( PORT ); 
+    address.sin_port = htons( DEFAULT_PORT ); 
        
-    // Forcefully attaching socket to the port 8080 
     if (bind(THIS server_fd, (struct sockaddr *)&address,  
                                  sizeof(address))<0) 
     { 
@@ -52,14 +45,16 @@ void ServerSocket::initSocketServer() {
 }
 
 int ServerSocket::acceptConnection() {
-    if ((THIS new_socket = accept(
+    if ((
+            THIS client_fd = accept(
             THIS server_fd, (struct sockaddr *)&address,  
-                      (socklen_t*)&addrlen)
-        )<0){ 
+            (socklen_t*)&addrlen)
+        ) < 0
+    ){ 
         perror("accept"); 
         exit(EXIT_FAILURE); 
     } 
-    return THIS new_socket;
+    return THIS client_fd;
 }
 
 std::string ServerSocket::readSocket(int client) {
@@ -70,7 +65,7 @@ std::string ServerSocket::readSocket(int client) {
 }
 
 void ServerSocket::sendMsg(const char* data) {
-    send(THIS new_socket , data , strlen(data) , 0 ); 
+    send(THIS client_fd , data , strlen(data) , 0 ); 
 }
 
 int ServerSocket::getFD() {
@@ -78,10 +73,17 @@ int ServerSocket::getFD() {
 }
 
 int ServerSocket::getClientFD() {
-    return THIS new_socket;
+    return THIS client_fd;
 }
 
 void ServerSocket::closeSocket() {
     close(THIS server_fd);
-    if(THIS new_socket) close(THIS new_socket);
+    if(THIS server_fd != -1){
+        close(THIS server_fd);
+        THIS server_fd = -1;
+    }  
+    if(THIS client_fd != -1){
+        close(THIS client_fd);
+        THIS client_fd = -1;
+    }  
 }
