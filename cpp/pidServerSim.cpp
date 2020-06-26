@@ -12,8 +12,8 @@
 #include "select/SelectManager.h"
 
 // Definiciones para el motor simulado.
-#define MOTOR_MAX_SPEED 210.0
-#define MOTOR_SENSITIVITY 7.0/255.0
+#define MOTOR_MAX_SPEED 130.0
+#define MOTOR_SENSITIVITY 0.015
 
 // Cantidad de actualizaciones por segundo con el motor.
 #define MOTOR_UPDATE_TIMES 64

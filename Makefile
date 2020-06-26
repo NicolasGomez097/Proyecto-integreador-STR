@@ -7,7 +7,7 @@ pid_server: cpp/pidServer.cpp rtc.o pid.o ServerSocket.o motor_udp.o ClientSocke
 pid_server_sim: cpp/pidServerSim.cpp rtc.o pid.o ServerSocket.o motor.o ClientSocket.o utils.o SelectManager.o
 	g++ cpp/pidServerSim.cpp \
 		rtc.o pid.o ServerSocket.o motor.o ClientSocket.o utils.o SelectManager.o \
-		-w -o serverSim;
+		-w -o server;
 	make -s clean
 
 clean:

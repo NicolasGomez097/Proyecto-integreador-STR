@@ -1,5 +1,6 @@
 #include "motor.h"
 #include <cmath>
+#include <stdio.h>
 
 
 #define THIS this->
@@ -26,7 +27,7 @@ float Motor::getTorque () {
 }
 
 float Motor::getSpeed() {
-    float finalVelocity = THIS maxSpeed * (1.0 - exp(-THIS torque * THIS sensitivity));
+    float finalVelocity = THIS maxSpeed * (1.0f - exp(-THIS torque * THIS sensitivity));
     THIS speed = lerp(THIS speed, finalVelocity, ACCELERATION);
     
     return THIS speed;

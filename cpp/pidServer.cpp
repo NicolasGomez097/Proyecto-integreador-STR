@@ -19,7 +19,7 @@
 #define MOTOR_UPDATE_TIMES 64
 
 // Definiciones para la conexion con el motor remoto.
-#define MOTOR_HOST "181.90.115.50"
+#define MOTOR_HOST "181.90.115.214"
 #define MOTOR_PORT 5678
 #define MOTOR_IS_TCP false
 
