@@ -7,11 +7,11 @@ Proyecto para el control de un motor remoto.
 
 ## Utilizacion
 #### C++
-* Ejecutar dentro de la carpeta `/cpp` el comando `make pid_server`.
-* Ejecutar el archivo `server` generado con el comando anterior en la carpeta `/cpp`.
+* Ejecutar el comando `make pid_server` para la conexión del motor UDP o `make pid_server_sim` para el motor simulado.
+* Ejecutar el archivo `server` generado con el comando anterior.
 #### Python
-* En otra consola ejecutar dentro de la carpeta `/python` el archivo `main3_gui.py`.
-* utilizar el deslizador para determinar la velocidad deseada del motor simulado, kp, ki y kd.
+* Ejecutar el archivo `main3_gui.py`.
+* utilizar el deslizador para determinar la velocidad deseada del motor, kp, ki y kd.
 
 ## Clases Python
 * **MotorControl**: Se encarga de los deslizadores y de mostrar el valor de la velocidad y el torque actual.
